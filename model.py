@@ -2,7 +2,14 @@ import csv
 import cv2
 import numpy as np
 import random
+import os.path
 
+if os.path.isfile('model.h5'):
+    modelmode = 'NEW'
+else:
+    modelmode = 'TUNE'
+    
+    
 lines = []
 
 dataPath = './data/mydata/';
@@ -54,7 +61,8 @@ for line in lines:
     filename = source_path.split('/')[-1] # linux
     # filename = source_path.split('\\               ')[-1] # windows
     current_path = dataPath +'IMG/' + filename
-    image = cv2.imread(source_path)
+    
+    image = cv2.imread(current_path)
     images.append(image)
     measurement = float(line[3])
     measurements.append(measurement)
@@ -67,13 +75,11 @@ for line in lines:
         flipcount+=1
 
     # left camera
-    
-    
     source_path = line[1]
     filename = source_path.split('/')[-1] # linux
     #filename = source_path.split('\\               ')[-1] # windows
     current_path = dataPath +'IMG/' + filename
-    image = cv2.imread(source_path)
+    image = cv2.imread(current_path)
     images.append(image)
     measurement = float(line[3]) + 0.08
     measurements.append(measurement)
@@ -85,11 +91,12 @@ for line in lines:
         measurements.append( inverted_measurement )
         flipcount+=1
 
+    #right camera
     source_path = line[2]
     filename = source_path.split('/')[-1] # linux
     #filename = source_path.split('\\               ')[-1] # windows
     current_path = dataPath +'IMG/' + filename
-    image = cv2.imread(source_path)
+    image = cv2.imread(current_path)
     images.append(image)
     measurement = float(line[3]) -  0.08
     measurements.append(measurement)
@@ -99,7 +106,8 @@ for line in lines:
         images.append(  flipped_image )
         inverted_measurement = measurement*-1.0 
         measurements.append( inverted_measurement )
-        flipcount+=1
+        flipcount+=1   
+    
         
 X_train = np.array(images)
 y_train = np.array(measurements)	
@@ -152,17 +160,28 @@ model.compile(loss='mse', optimizer='adam')
     
 myEpochs=1
 myBatchsize = 128 # 64 faster  # 32 default
-model.fit(X_train, y_train, validation_split=0.2, shuffle=True, batch_size=myBatchsize, epochs=myEpochs)
+lastrun = model.fit(X_train, y_train, validation_split=0.2, shuffle=True, batch_size=myBatchsize, epochs=myEpochs)
 
 model.save('model.h5')
 
+ # print the keys contained in the history object
+print(lastrun.history.keys())
 
+# plot the training and validation loss for each epoch
+plt.plot(lastrun.history['loss'])
+plt.plot(lastrun.history['val_loss'])
+plt.title('model mean squared error loss')
+plt.ylabel('mean squared error loss')
+plt.xlabel('epoch')
+plt.legend(['training set', 'validation set'], loc='upper right')
+    
+plt.show()
 
 
 # TODO
 # Cropping checken
 # images verkleinern
-# drive.py sends RGB images to the model; cv2.imread() reads images in BGR format!!!! Echt ??
+
 
 		
 
