@@ -102,10 +102,10 @@ Using 3 cameras generates 3x as much training data, with additonally flipping im
 
 ### Statistics for NNVIDIA model ###
 
-| No. of Cams | added flipped img. 	| Num. samples 	| epochs 		| train loss 	| valid loss 	| Description |  Failure at |
+| No. of Cams | added flipped img. 	| total samples 	| epochs 		| train loss 	| valid loss 	| Description |  Failure at |
 |:-----------:|:-------------------:|:-------------:|:-------------:|:--------------|:--------------|:------------|:------------:    
-| 1   	      |   yes	       		| 9367  		| 1				|  3.53 %		| 1.51 % 		|  Holding track for 10 sec. |   ![alt text](fail_1cam.jpg)
-| 3   	      |   yes	       		| ?     		| 1				|  ?  %			| ?  % 			|  Holding track for 90 sec. |   ![alt text](fail_3cam_1.jpg)
+| 1   	      |   1332	       		| 9367  		| 1				|  3.53 %		| 1.51 % 		|  Holding track for 10 sec. |   ![alt text](fail_1cam.jpg)
+| 3   	      |   19747	       		| 35084     	| 1				|  3,16 %		| 1,28 % 			|  Holding track for 90 sec. |   ![alt text](fail_3cam_1.jpg)
 
 
 
