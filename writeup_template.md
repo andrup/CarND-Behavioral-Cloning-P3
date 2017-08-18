@@ -99,21 +99,31 @@ The implementation was correct, so I generated more data by adding the left and 
 The car should correct it's driving back to the center when it sees an image off the centre. Therefore a correction to the steering angle has to be added. 
 After trying different paramters I ended up with 8% correction factor.
 Using 3 cameras generates 3x as much training data, with additonally flipping images for curves even more.
+Now I realized that training many times is too time consuming and added loading and saving of a model.
+To run more Epochs I decided to continue on AWS GPU cloud computer. This was the point were switched from All-In-One processing to processing  with a generator.
+
 
 ### Statistics for NNVIDIA model ###
+angel correction constant +/- 15 degree for left and right camera
 
-| No. of Cams | added flipped img. 	| total samples 	| epochs 		| train loss 	| valid loss 	| Description |  Failure at |
-|:-----------:|:-------------------:|:-------------:|:-------------:|:--------------|:--------------|:------------|:------------:    
-| 1   	      |   1332	       		| 9367  		| 1				|  3.53 %		| 1.51 % 		|  Holding track for 10 sec. |   ![alt text](fail_1cam.jpg)
-| 3   	      |   19747	       		| 35084     	| 1				|  3,16 %		| 1,28 % 			|  Holding track for 90 sec. |   ![alt text](fail_3cam_1.jpg)
+| No. of Cams | cropped | added flipped| total samples | epochs 	|Data set 		| train loss 	| valid loss 	| Description 				|  Failure at					 	| Comment 		|
+|:-----------:|:-------:|:------------:|:-------------:|:----------:|:-------------:|:--------------|:--------------|:--------------------------|:---------------------------------:|:-------------:|    
+ 1   	      |   no 	|1332	       | 9367  			| 1			|	initial		|  0.0353 		| 0.0151  		|   On track for 10 sec. 	| first left curve  | Nvidia model can hold the track for some seconds
+ 3   	      |   no	|19747	       | 35084     		| 1			|	initial		|  0.0316 		| 0.0128  		|  On track for 90 sec. 		| first sharp left curve, hit marking	| big improvement with 3 cams
+ 3   	      |   yes   |11025	       | 28104     		| 3			|	added 2 rounds fwd. |  0.0119 		| 0.0154  		|   On track 90 sec. 		| first sharp left curve, hit marking	| 
+ 3			  |   yes   | 3105 		   | 12261    		| 4  		|   added 2 rounds ba	|	0.0275		    |			0.0507	|  On track for 		| ! 								|  
+ 
+At this point I realized that the model is overfitting. (statistik_3cam_crop_4epoch_backwards.JPG)
+I decided to set it up new with droupout layers.
+Moreover I decided to add 5 degrees to the steering angle corrections because the off-center correction was too slow.
 
 
+### Statistics for NNVIDIA model with dropouts ###
+Angel correction constant +/- 20 degree for left and right camera
 
-|test|test2|
-|:--|:---|
-|aaadd|afsd|
-
-
+| No. of Cams | cropped | added flipped| total samples | epochs 	|Data set 		| train loss 	| valid loss 	| Description 				|  Failure at					 	| Comment 		|
+|:-----------:|:-------:|:------------:|:-------------:|:----------:|:-------------:|:--------------|:--------------|:--------------------------|:---------------------------------:|:-------------:|    
+ 1   	      |   yes 	|1332	       | 9367  			| 1			|	initial		|  0.0353 		| 0.0151  		|   On track for 10 sec. 	| first left curve  | Nvidia model can hold the track for some seconds
 
 My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
 
