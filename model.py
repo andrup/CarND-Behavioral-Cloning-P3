@@ -10,7 +10,7 @@ from shutil import copyfile
 from datetime import datetime
 from keras.models import Sequential, model_from_json, load_model 
 from keras.layers import Flatten, Dense, Conv2D, Lambda, Cropping2D
-from keras.layers import MaxPooling2D, Dropout  # used for LeNet5 only
+#from keras.layers import MaxPooling2D, Dropout  # used for LeNet5 only
 from keras.optimizers import Adam
 from keras.preprocessing.image import img_to_array
 
@@ -24,16 +24,16 @@ runmode = 'GENERATOR'
 
 
 #dataPath = './data/'
-dataPath = './datamouse/'
+dataPath = './dataps3/'
 logfile = 'driving_log.csv'
 
-steeringAngleCorrection = [0, 0.25, -0.25]
+steeringAngleCorrection = [0, 0.20, -0.20]
 
 imgsizeX = 320
 imgsizeY = 160
 
-epochs = 3
-batchsize = 256 # 64 faster  # 32 default 
+epochs = 2
+batchsize = 128 # 64 faster  # 32 default 
 
 ######## innitialize variables ########
 lines = []
@@ -101,10 +101,10 @@ def getImage2( source_path ):
     return image
 
 # for smaple log Linux
-def getImage( source_path ):
-    filename = source_path.split('/')[-1] # linux
-    current_path = dataPath +'IMG/' + filename
-    image = cv2.imread(current_path)
+def getImage( dataDir, source_path ):
+    filename = dataDir + source_path.split('\\')[-1]
+    image = cv2.imread(filename)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
 
     
@@ -124,28 +124,24 @@ def LeNet5Model():
     model.add(Dense(1, activation='softmax'))
     return model
 
-def resize_normalize(image):
-    import cv2
-    from keras.backend import tf as ktf   
-    
-    # resize to width 200 and high 66 liek recommended
-    # in the nvidia paper for the used CNN
-    # image = cv2.resize(image, (66, 200)) #first try
-    #resized = ktf.image.resize_images(image, (32, 128))
-    #normalize 0-1
-    resized = resized/255.0 - 0.5
-
-    return resized
 
 def NvidiaModel():
-    model = Sequential()
-    # Prepocesssing
-    model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160,320,3)))
-    model.add(Cropping2D(cropping=((60,25), (0,0)), input_shape=(160,320,3)))
-    #model.add(Lambda(resize_normalize, input_shape=(160, 320, 3), output_shape=(160, 320, 3)))
     
-    #crops 60 pixels from top, 25 pixels from bottom, 0 pixels from left, and 0 pixels from right
-    #model.add(Lambda(resize_normalize, input_shape=(160, 320, 3), output_shape=(32, 128, 3)))
+    def resize_normalize(image):
+        from keras.backend import tf as ktf   
+        resized = ktf.image.resize_images(image, (80, 160))
+        #normalize 0-1
+        resized = resized/255.0 - 0.5
+        return resized
+    
+
+    model = Sequential()
+    # Prepocesssing    
+    # this line made problems when running a AWS model.h5 on a local windows machine
+    #crops 60 pixels from top, 25 pixels from bottom, 0 pixels from left, and 0 pixels from right    
+    model.add(Cropping2D(cropping=((60,25), (0,0)), input_shape=(160,320,3)))
+    model.add(Lambda(resize_normalize, input_shape=(160,320,3), output_shape=(80,160,3)))     
+
 
     # Model Layers
     model.add(Conv2D(24,(5,5), strides=(2,2), activation='relu'))
@@ -155,11 +151,11 @@ def NvidiaModel():
     model.add(Conv2D(64,(3,3), activation='relu'))
     model.add(Flatten())
     model.add(Dense(100, activation='relu'))
-    #model.add(Dropout(0.3))
+    model.add(Dropout(0.3))
     model.add(Dense(50, activation='relu'))
-    #model.add(Dropout(0.3))
+    model.add(Dropout(0.3))
     model.add(Dense(10, activation='relu'))
-    #model.add(Dropout(0.3))
+    model.add(Dropout(0.3))
     model.add(Dense(1))
     return model
 
@@ -174,31 +170,35 @@ def plotResult(hist):
     plt.show()
     return
 
-def data_generator(data, batch_size, steeringAngleCorrection, modus):
+def data_generator(data, batch_size, steeringAngleCorrection, modus, dataDir):
     num_samples = len(data)
     #print('modus %s'  %modus)
     #print('data len:' ,num_samples )    
-    while 1:  # endless loop
+    while True:  # endless loop
         shuffle(data)
         for offset in range(0, num_samples, batch_size):  # loop over batches
             batch_samples = data[offset : (offset+batch_size)]
             images = []
             measurements = []
-            print('offset ' , offset)
+            #print('offset ' , offset)
             # loop over samples in batch 
-            for i in range(0, len(batch_samples) ):
-                #print('i ' , i)
-                measurement = float(lines[i][3])                       
+            for batch_sample in batch_samples:
+                measurement = float(batch_sample[3]) # 3 = steering_angle 
+                #if modus == 'TRAIN':                 
                 for camind in range(0,3):    #0,1,2                             
                     adaptedMeasurement = measurement + steeringAngleCorrection[camind]                                 
                     measurements.append(adaptedMeasurement)
-                    image = cv2.imread(lines[i][1])
+                    image = getImage(dataDir + 'IMG/', batch_sample[camind])
                     images.append( img_to_array(image) )   
                     # added flipped image and steering angle
                     imageFlipped = cv2.flip(image, 1)                    
                     images.append( img_to_array( imageFlipped ))
                     measurements.append( adaptedMeasurement * (-1) )
-                   
+                #else:
+                #    measurements.append(measurement)
+                #    image = cv2.imread(batch_sample[0])  # 0  = center image
+                #    images.append( img_to_array(image) )   
+                    
             X_train = np.array(images)
             y_train = np.array(measurements)
             yield shuffle(X_train, y_train)
@@ -224,7 +224,7 @@ print("Epochs:", epochs)
 print("------------")
 
 try:    
-    # Import images from logfiles
+    # Import images from logfiles      
     with open(dataPath + logfile ) as csvfile:
         print(dataPath + logfile)
         reader = csv.reader(csvfile)
@@ -232,14 +232,14 @@ try:
         #next(reader, None)        
         for line in reader:          
             # 2/3 of all data is straigt with angle 0.
-            # To prevent a bias for straight every 3rd row with angle 0 is dropped. Later it's flipped and though doubled again     
+            # To prevent a bias for straight 2 of 3 rows with angle 0 are dropped. Later it's flipped and though doubled again     
             # sort out extreme steering angles
             if ( float(line[3]) != 0.0 and float(line[3]) < 30.0  and float(line[3]) > -30.0 ) or  ( float(line[3]) == 0.0 and random.randint(0,3) == 1):
                 lines.append(line)
 except Exception:
      file = dataPath + logfile
      print('%s not found' % file)
-     
+     sys.exit()
 # take 100 random images only to spped up first test
 
 
@@ -261,6 +261,8 @@ if runmode == 'ALLATONCE':
     for i in range(0,n):
        # print(i)
         measurement = float(lines[i][3])    
+        # if modus == TRAIN # import helper
+        #load_and_augment_image(batch_sample)
         # center camera = 0, left = 1, right = 2
         for camind in range(0,3):
             path = lines[i][camind]        
@@ -273,7 +275,7 @@ if runmode == 'ALLATONCE':
                 measurements.append( adaptedMeasurement * (-1) )
                 flipcount+=1      
     X_train = np.array(images)
-    y_train = np.array(measurements)	
+    y_train = np.array(measurements)    
     print('Added %d flipped images: ' %flipcount)
 
 # print a mopdel summary for documentationmodel.fit(
@@ -282,22 +284,21 @@ if runmode == 'ALLATONCE':
 model.compile(loss='mse',  optimizer = Adam(lr=1e-4) ) #optimizer='adam')  , s
 
 if runmode == 'ALLATONCE':    
-    history_object = model.fit(X_train, y_train, validation_split=0.05, shuffle=True, batch_size=batchsize, epochs=epochs)
+    history_object = model.fit(X_train, y_train, validation_split=0.1, shuffle=True, batch_size=batchsize, epochs=epochs)
   #print()
 else:    
     # Generator mode if memory problems occur
-    train_samples, validation_samples = train_test_split(lines, test_size=0.2)
+    train_samples, validation_samples = train_test_split(lines, test_size=0.1)
     shuffle(train_samples)
     shuffle(validation_samples)
-    print( len(train_samples) )
-    print( 6* len(train_samples) )
-    train_generator = data_generator(train_samples, batchsize, steeringAngleCorrection,'TRAIN')
-    validation_generator = data_generator(validation_samples, batchsize, steeringAngleCorrection,'VALID')
+    print( 'Len Train Samoles: ',len(train_samples) )
+    train_generator = data_generator(train_samples, batchsize, steeringAngleCorrection,'TRAIN', dataPath)
+    validation_generator = data_generator(validation_samples, batchsize, steeringAngleCorrection,'VALID', dataPath)
    #When you use fit_generator, the number of samples processed for each epoch is batch_size * steps_per_epochs. 
    # factor 6 because of 3 cameras and each is added flipped
-    stepsPerEpoch = math.ceil( 6 * len(train_samples)/batchsize )
+    stepsPerEpoch =  len(train_samples)/batchsize 
     print ('Steps per Epoch: ' , stepsPerEpoch)
-    validSteps =  math.ceil( 6 *  len(validation_samples)/batchsize )
+    validSteps =   len(validation_samples)/batchsize 
     print ('Validation Steps: ' , validSteps)
     #new keras version    
     history_object = model.fit_generator(
@@ -322,6 +323,7 @@ if os.name == 'nt':
     plotResult(history_object)
 
 # TODO
+# aws grössere machine ordern, alte löschen, - h5 Format ??? vorher testen
 # path anpassen für run on aws
 # try joyxstick / controller
-
+# brightnesss, camera, 
