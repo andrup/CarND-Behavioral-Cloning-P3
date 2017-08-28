@@ -9,7 +9,7 @@ The goals / steps of this project are the following:
 
 ## Final Result ##
 
-[<img src="curve1flipped.jpg">](videotrack1HD.mp4)
+[<img src="images/curve1flipped.jpg">](videotrack1HD.mp4)
 
 *[Click the image](videotrack1HD.mp4) to play the video in HD or [click here](videotrack1.mp4) for low resolution.*
 
@@ -93,7 +93,7 @@ I found that the unmodified Nvidea-model had a low mean squared error on the tra
 I re-read the the theory to doublecheck my implementation of the model. [https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/]. The implementation was correct, so I generated more data by adding the left and right camera images and introduced a correction for the steering angle. Because the images from the left and right camera are "off the center" from the left/right perspective, the steering angles has to be adjusted. 
 The car should correct it's driving back to the center when it sees an image off the centre. Therefore a correction factor for the steering angle was added.  After trying different factors between 5 and 30 degrees I ended up with 28% correction factor.
 Using 3 cameras generates 3x as much training data, with additonally flipping images for curves even more. This should b e enough to train the model. The processing time now increased a lot and I decided to crop and resize the image to half the size of x andy, reducting the toal size by 4. This speeded up the calcuation significantly. Even if the original Nvidia model was built for 66x200 pixels, it had no problems to process my reduced image sizes of 80x160 pixels. But the model did still not work. 
-![Modified model after 30 Epochs](nvidia_mod_30_epoch.jpg)
+![Modified model after 30 Epochs](images/nvidia_mod_30_epoch.jpg)
 I added the cropping and resizing also in the drive.py and it showed much better results ncw. 
 Even 30 epochs didn't bring up a perfect round and so I added more augmented images with random brightness. **With this modification the car was able to complete the first track**. Next I reduced the number of epochs in respect to the learning curves and found out that just 3 epochs are enough. I tried with the smaller dataset from Udacity to further optimize the calculation time. At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
@@ -107,7 +107,7 @@ The final model architecture  consisted of a convolution neural network with the
 
 
 Here is a visualization of the architecture:
-![Nvidea with Dropout](nvidea_dropout.jpg)
+![Nvidea with Dropout](images/nvidea_dropout.jpg)
 
 #### 3. Creation of the Training Set & Training Process
 
@@ -117,15 +117,15 @@ The best results I got when I connected my PS3 Gamecontroller via USB.
 
 First I drove 2 rounds forward and tested the model. 
 
-![alt text](curve1fwd.jpg)
+![alt text](images/curve1fwd.jpg)
 
 Because it didn't work, I collected more data with driving the same track in the other direction. More finetuning was needed and I recorded some sharp curves and finding back to the center of the lane
 
-![alt text](recenter.jpg)
+![alt text](images/recenter.jpg)
 
 To augment the data sat, I also flipped images and steering angles thinking that this would help generalizing the model as it has mostly only left curves and will learn to drive right curves as well.
 
-![Flipped Image](curve1flipped.jpg)
+![Flipped Image](images/curve1flipped.jpg)
 
 The model was doing well but it was not able to complete the round. 
 I tried ELU instead of **RELU** activation, but the result got worse.
@@ -133,27 +133,27 @@ For tuning purposes I tried also **different color schemas**, e.g. YUV instead o
 
 Statistics of the final run with 3 epochs, batchsize=128 on my laptop:
 
-![final run](working_3_epo_nvidea_rgb.jpg)
+![final run](images/working_3_epo_nvidea_rgb.jpg)
 
 
 #### Preprocessing
 The following steps were taken for preprocessing the images:
 
 **Filtering of steering angles by dropping images with **
-- 0 degree ( dropping 50% )
+- 0 degree ( dropping 50% ) 
 - degress < or > 30 
 
 **Cropping images 160x320 -> 80 x 320 **
-![cropped](cropped.jpg)  
+![cropped](images/cropped.jpg)
 
 **Resizing images to 80x160**
-![cropped](resized.jpg)  
+![cropped](images/resized.jpg)
 
 **Adding images with random brightness**
-![alt text](brightness.jpg) &nbsp; ![alt text](brightness2.jpg)
+![alt text](images/brightness.jpg) &nbsp; ![alt text](brightness2.jpg)
 
 **Adding 50% of flipped images with steering angle <>0**
-![alt text](curve1fwd.jpg)  &nbsp; ![alt text](curve1flipped.jpg)
+![alt text](images/curve1fwd.jpg)  &nbsp; ![alt text](curve1flipped.jpg)
 
 I finally randomly shuffled the data set and put 20% of the data into a validation set. 
 
