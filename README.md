@@ -143,7 +143,7 @@ Statistics of the final run with 3 epochs, batchsize=128 on my laptop:
 #### Preprocessing
 The following steps were taken for preprocessing the images:
 
-**Filtering of steering angles by dropping images with **  
+**Filtering of steering angles by dropping images with**  
 - 0 degree ( dropping 50% ) 
 - degress < or > 30 
 
