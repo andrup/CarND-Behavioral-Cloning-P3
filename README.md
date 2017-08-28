@@ -96,8 +96,9 @@ The car should correct it's postition back to the center when it sees an camera 
 Using 3 cameras generates 3x as much training data, with additonally flipping images for curves even more. This should b e enough to train the model. The processing time now increased a lot and I decided to crop and resize the image to half the size of X and Y, reducing the total size by 4. This speeded up the calcuation significantly. Even if the original Nvidia model was built for 66x200 pixels, it had no problems to process my reduced image sizes of 80x160 pixels. But the model didn't still predict the correct steering angles.
 
 I added the cropping and resizing also in the drive.py and it showed much better results ncw. 
-![Modified model after 30 Epochs](images/nvidia_mod_30_epoch.jpg)
-Even 30 epochs didn't result in a perfect round and so I added more augmented images with random brightness. 
+![Modified model after 30 Epochs](images/nvidia_mod_30_epoch.jpg)  
+
+Even 30 epochs didn't result in a perfect round and so I added more augmented images with random brightness.  
 **With this modification the car was now able to complete the first track**. Next I reduced the number of epochs in respect to the learning curves and found out that just 3 epochs are enough to produce sufficient results. Next I tried with the smaller dataset from Udacity to further optimize the calculation time. At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
 
@@ -142,7 +143,7 @@ Statistics of the final run with 3 epochs, batchsize=128 on my laptop:
 #### Preprocessing
 The following steps were taken for preprocessing the images:
 
-**Filtering of steering angles by dropping images with **
+**Filtering of steering angles by dropping images with **  
 - 0 degree ( dropping 50% ) 
 - degress < or > 30 
 
@@ -168,9 +169,10 @@ I used this training data for training the model. The validation set helped dete
 
 #### Lessons learned:
 - Preprocessing is as important as the model architecture itself
-- Models calculated on AWS Clound doesn't run on local machine because fo different Tensorflow Versions. It was difficult to Upgrade the Tensorflow GPU library or downgrade my Windows Anaconda installation. An updated AWS Image would have saved much time.
-- If input into the model is cropped, the output of the simulator processed by drive.py also has to be cropped
-- random rightness augmentation was very helpful
+- Models calculated on AWS Clound doesn't run on local machine because of different Tensorflow Versions. It was difficult to Upgrade the Tensorflow GPU library or downgrade my Windows Anaconda installation. An updated AWS Image would have saved much time.
+- If input into the model is cropped, the output of the simulator processed in drive.py also has to be cropped
+- Random rightness augmentation was very helpful
+- Be careful with converting the color spaces
 
 
 
