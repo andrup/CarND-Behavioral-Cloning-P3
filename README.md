@@ -9,9 +9,9 @@ The goals / steps of this project are the following:
 
 ## Final Result ##
 
-[<img src="images/curve1flipped.jpg">](videotrack1HD.mp4)
+[<img src="images/preview.gif">](videotrack1HD.mp4) 
 
-*[Click the image](videotrack1HD.mp4) to play the video in HD or [click here](videotrack1.mp4) for low resolution.*
+*[Click here](videotrack1HD.mp4) to play the video in HD or [click here](videotrack1.mp4) for low resolution.*
 
 
 ### Model Architecture and Training Strategy
@@ -90,12 +90,15 @@ _________________________________________________________________
 
 I found that the unmodified Nvidea-model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting and I added 3 dropout layers in the 3 output layers.  One reason might be that the model deals with high definition images and not with low-resolution gamegraphics from a simulator. Another reason could be the lack of training data. 
 
-I re-read the the theory to doublecheck my implementation of the model. [https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/]. The implementation was correct, so I generated more data by adding the left and right camera images and introduced a correction for the steering angle. Because the images from the left and right camera are "off the center" from the left/right perspective, the steering angles has to be adjusted. 
-The car should correct it's driving back to the center when it sees an image off the centre. Therefore a correction factor for the steering angle was added.  After trying different factors between 5 and 30 degrees I ended up with 28% correction factor.
-Using 3 cameras generates 3x as much training data, with additonally flipping images for curves even more. This should b e enough to train the model. The processing time now increased a lot and I decided to crop and resize the image to half the size of x andy, reducting the toal size by 4. This speeded up the calcuation significantly. Even if the original Nvidia model was built for 66x200 pixels, it had no problems to process my reduced image sizes of 80x160 pixels. But the model did still not work. 
-![Modified model after 30 Epochs](images/nvidia_mod_30_epoch.jpg)
+I doublechecked my implementation of the model. Source: [https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/]. The implementation was correct, so I generated more data by adding the left and right camera images and introduced a correction for the steering angle. Because the images from the left and right camera are "off the center" from the left/right perspective, the steering angles has to be adjusted.  
+
+The car should correct it's postition back to the center when it sees an camera image off the centre. Therefore a correction factor for the steering angle was added.  After trying different factors between 5 and 30 degrees I ended up with 28% correction factor. 
+Using 3 cameras generates 3x as much training data, with additonally flipping images for curves even more. This should b e enough to train the model. The processing time now increased a lot and I decided to crop and resize the image to half the size of X and Y, reducing the total size by 4. This speeded up the calcuation significantly. Even if the original Nvidia model was built for 66x200 pixels, it had no problems to process my reduced image sizes of 80x160 pixels. But the model didn't still predict the correct steering angles.
+
 I added the cropping and resizing also in the drive.py and it showed much better results ncw. 
-Even 30 epochs didn't bring up a perfect round and so I added more augmented images with random brightness. **With this modification the car was able to complete the first track**. Next I reduced the number of epochs in respect to the learning curves and found out that just 3 epochs are enough. I tried with the smaller dataset from Udacity to further optimize the calculation time. At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+![Modified model after 30 Epochs](images/nvidia_mod_30_epoch.jpg)
+Even 30 epochs didn't result in a perfect round and so I added more augmented images with random brightness. 
+**With this modification the car was now able to complete the first track**. Next I reduced the number of epochs in respect to the learning curves and found out that just 3 epochs are enough to produce sufficient results. Next I tried with the smaller dataset from Udacity to further optimize the calculation time. At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
 
 #### 2. Final Model Architecture
@@ -165,9 +168,10 @@ I used this training data for training the model. The validation set helped dete
 
 #### Lessons learned:
 - Preprocessing is as important as the model architecture itself
-- Models calculated on AWS Clound doesn't run on local machine because fo different Tensorflow Versions. It was difficult to Upgrade the Tensorflow GPU library or downgrade my Windows Anaconda installation
-- If you crop input into the model, the output of the simulator processed by drive.py also has to be cropped
-- randon rightness augmentation was very helpful
+- Models calculated on AWS Clound doesn't run on local machine because fo different Tensorflow Versions. It was difficult to Upgrade the Tensorflow GPU library or downgrade my Windows Anaconda installation. An updated AWS Image would have saved much time.
+- If input into the model is cropped, the output of the simulator processed by drive.py also has to be cropped
+- random rightness augmentation was very helpful
+
 
 
 
