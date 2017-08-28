@@ -117,11 +117,11 @@ The best results I got when I connected my PS3 Gamecontroller via USB.
 
 First I drove 2 rounds forward and tested the model. 
 
-![alt text](images/curve1fwd.jpg)
+![forward](images/curve1fwd.jpg)
 
 Because it didn't work, I collected more data with driving the same track in the other direction. More finetuning was needed and I recorded some sharp curves and finding back to the center of the lane
 
-![alt text](images/recenter.jpg)
+![recentered](images/recenter.jpg)
 
 To augment the data sat, I also flipped images and steering angles thinking that this would help generalizing the model as it has mostly only left curves and will learn to drive right curves as well.
 
@@ -144,16 +144,20 @@ The following steps were taken for preprocessing the images:
 - degress < or > 30 
 
 **Cropping images 160x320 -> 80 x 320 **  
+
 ![cropped](images/cropped.jpg)
 
 **Resizing images to 80x160**  
+
 ![cropped](images/resized.jpg)
 
 **Adding images with random brightness**  
-![alt text](images/brightness.jpg) &nbsp; ![alt text](brightness2.jpg)
+
+![higher brightness](images/brightness.jpg) &nbsp; ![lower brightness](images/brightness2.jpg)
 
 **Adding 50% of flipped images with steering angle <>0**  
-![curve](images/curve1fwd.jpg)  &nbsp; ![flipped curve](curve1flipped.jpg)
+
+![curve](images/curve1fwd.jpg)  &nbsp; ![flipped curve](images/curve1flipped.jpg)
 
 I finally randomly shuffled the data set and put 20% of the data into a validation set. 
 
