@@ -28,7 +28,7 @@ logfile = 'driving_log.csv'
 
 logStartPosition = 0
 
-print( os.getcwd()) # Prints the working directory
+# print( os.getcwd()) # Prints out the working directory
 
 steeringAngleCorrection = [0, 0.28, -0.28]
 
@@ -78,7 +78,7 @@ def showImage(img):
     cv2.destroyAllWindows()
     return
 
-# for smaple log Linux
+# for sample log Linux
 def getImage( dataDir, source_path ):    
     #for linux logs
     filename = dataDir + source_path.split('/')[-1]
@@ -147,8 +147,7 @@ def data_generator(data, batch_size, steeringAngleCorrection, modus, dataDir):
             #print('offset ' , offset)
             # loop over samples in batch 
             for batch_sample in batch_samples:
-                measurement = float(batch_sample[3]) # 3 = steering_angle 
-                #if modus == 'TRAIN':                 
+                measurement = float(batch_sample[3]) # 3 = steering_angle                            
                     
                 if modus == 'TRAIN':                    
                     for camind in range(0,3):    #0,1,2                             
@@ -158,12 +157,12 @@ def data_generator(data, batch_size, steeringAngleCorrection, modus, dataDir):
                         
                         image = random_brightness(image)
                         
-                        # nvidea
+                        # cropping the image
                         image = image[60:140, 0:320] # Crop from x, y, w, h -> 100, 200, 300, 400 
                         image = cv2.resize(image, (160, 80), interpolation=cv2.INTER_AREA)                                                
                         images.append( img_to_array(image) )   
                         
-                        # added flipped image and steering angle with for 50% of all samples
+                        # add a flipped image and inverted steering angle for 50% of all samples
                         if random.randrange(2) == 1:
                             imageFlipped = cv2.flip(image, 1)                    
                             images.append( img_to_array( imageFlipped ))
@@ -172,7 +171,7 @@ def data_generator(data, batch_size, steeringAngleCorrection, modus, dataDir):
                     measurements.append(measurement)
                     image = getImage(dataDir + 'IMG/', batch_sample[0])  # 0  = center image
                     
-                    # nvidea
+                    # cropping the image
                     image = image[60:140, 0:320] # Crop from x, y, w, h -> 100, 200, 300, 400 
                     
                     # Resize, referring to http://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html#resize
