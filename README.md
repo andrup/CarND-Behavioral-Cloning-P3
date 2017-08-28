@@ -147,7 +147,7 @@ The following steps were taken for preprocessing the images:
 - 0 degree ( dropping 50% ) 
 - degress < or > 30 
 
-**Cropping images 160x320 -> 80 x 320 **  
+**Cropping images 160x320 -> 80 x 320**  
 
 ![cropped](images/cropped.jpg)
 
