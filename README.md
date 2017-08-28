@@ -133,7 +133,7 @@ For tuning purposes I tried also **different color schemas**, e.g. YUV instead o
 
 Statistics of the final run with 3 epochs, batchsize=128 on my laptop:
 
-![final run](images/working_3_epo_nvidea_rgb.jpg)
+![final run](images/working_3_epo_nvidea_rgb.jpg) 
 
 
 #### Preprocessing
@@ -143,17 +143,17 @@ The following steps were taken for preprocessing the images:
 - 0 degree ( dropping 50% ) 
 - degress < or > 30 
 
-**Cropping images 160x320 -> 80 x 320 **
+**Cropping images 160x320 -> 80 x 320 **  
 ![cropped](images/cropped.jpg)
 
-**Resizing images to 80x160**
+**Resizing images to 80x160**  
 ![cropped](images/resized.jpg)
 
-**Adding images with random brightness**
+**Adding images with random brightness**  
 ![alt text](images/brightness.jpg) &nbsp; ![alt text](brightness2.jpg)
 
-**Adding 50% of flipped images with steering angle <>0**
-![alt text](images/curve1fwd.jpg)  &nbsp; ![alt text](curve1flipped.jpg)
+**Adding 50% of flipped images with steering angle <>0**  
+![curve](images/curve1fwd.jpg)  &nbsp; ![flipped curve](curve1flipped.jpg)
 
 I finally randomly shuffled the data set and put 20% of the data into a validation set. 
 
